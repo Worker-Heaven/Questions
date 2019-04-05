@@ -74,8 +74,8 @@ def start_scraping(site_info):
         question = item.xpath('.//p[1]//a/text()')[0]
         answer = item.xpath('.//p[2]/text()')[0]
 
-        print('---------------------------')
-        print(''.join(answer))
+        # print('---------------------------')
+        # print(''.join(answer))
 
         store_to_db(
             table_name,
@@ -94,11 +94,19 @@ def start_scraping(site_info):
     last_index = ids[-1]
 
     while(True):
+        # if last_index < 39739 and last_index >= 16746:
+        #     last_index = 16746
+        # if last_index < 5134 and last_index >= 4172:
+        #     last_index = 4172       
+        # if last_index < 16741: break
+
         params = {
             'action': 'get',
             'last_qid': (str)(last_index),
             'scid': str(scid),
         }
+
+        print(last_index)
 
         response = requests.post(url, headers=headers, params=params)
         
@@ -114,9 +122,6 @@ def start_scraping(site_info):
             for item in main_content:
                 question = item.xpath('.//p[1]//a/text()')[0]
                 answer = item.xpath('.//p[2]/text()')
-
-                print('---------------------------')
-                print(''.join(answer))
 
                 store_to_db(
                     table_name,
