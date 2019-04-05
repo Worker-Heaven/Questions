@@ -94,11 +94,11 @@ def start_scraping(site_info):
     last_index = ids[-1]
 
     while(True):
-        # if last_index < 39739 and last_index >= 16746:
-        #     last_index = 16746
+        # if last_index < 17098 and last_index >= 2446:
+        #     last_index = 2446
         # if last_index < 5134 and last_index >= 4172:
         #     last_index = 4172       
-        # if last_index < 16741: break
+        # if last_index < 2391: break
 
         params = {
             'action': 'get',
