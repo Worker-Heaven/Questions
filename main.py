@@ -25,6 +25,35 @@ headers = {
 }
 
 
+def init_db():
+    conn = sqlite3.connect(db_name)
+    c = conn.cursor()
+
+    c.execute('''CREATE TABLE if not exists account_executive
+                 (question, answer, category, category_link, sub_category, sub_category_link, multi_choice)''')
+    
+    conn.commit()
+    conn.close()
+
+
+def store_to_db(question, answer, category, category_link, sub_category, sub_category_link, multi_choice):
+    conn = sqlite3.connect(db_name)
+    c = conn.cursor()
+
+    c.execute("INSERT INTO account_executive VALUES (?,?,?,?,?,?,?)", (
+        question,
+        answer,
+        category,
+        category_link,
+        sub_category,
+        sub_category_link,
+        multi_choice,
+    ))
+
+    conn.commit()
+    conn.close()
+
+
 def start_scraping():
     table_name = 'account_executive'
     scid = 2113
@@ -35,29 +64,24 @@ def start_scraping():
     initial_response = requests.get(sub_category_link)
     initial_page = html.fromstring(initial_response.text)
 
-
-    # NOTE: Open db
-    conn = sqlite3.connect(db_name)
-    c = conn.cursor()
-
-    c.execute('''CREATE TABLE if not exists account_executive
-                 (question, answer, category, category_link, sub_category, sub_category_link, multi_choice)''')
-
-
     contents = initial_page.xpath('//div[@class="main-content"]//div[@class="answer"]')
+
     for item in contents:
         question = item.xpath('.//p[1]//a/text()')[0]
         answer = item.xpath('.//p[2]/text()')[0]
 
-        c.execute("INSERT INTO account_executive VALUES (?,?,?,?,?,?,?)", (
+        print('---------------------------')
+        print(''.join(answer))
+
+        store_to_db(
             question[question.find('.')+1:],
-            answer,
+            ''.join(answer),
             category,
             category_link,
             sub_category,
             sub_category_link,
-            '-',
-        ))
+            '-', 
+        )
 
     string_ids = initial_page.xpath('//div[@class="main-content"]//div[@class="answer"]/@id')
     ids = [int(id[id.find('_')+1:]) for id in string_ids]
@@ -73,8 +97,8 @@ def start_scraping():
 
         response = requests.post(url, headers=headers, params=params)
         
-        print('status code', response.status_code)
-        print('response text', len(response.text))
+        # print('status code', response.status_code)
+        # print('response text', len(response.text))
 
         if (len(response.text) == 0): break
 
@@ -84,25 +108,26 @@ def start_scraping():
 
             for item in main_content:
                 question = item.xpath('.//p[1]//a/text()')[0]
-                answer = item.xpath('.//p[2]/text()')[0]
+                answer = item.xpath('.//p[2]/text()')
 
-                c.execute("INSERT INTO account_executive VALUES (?,?,?,?,?,?,?)", (
+                print('---------------------------')
+                print(''.join(answer))
+
+                store_to_db(
                     question[question.find('.')+1:],
-                    answer,
+                    ''.join(answer),
                     category,
                     category_link,
                     sub_category,
                     sub_category_link,
                     '-',
-                ))
+                )
         
         last_index -= 5
     
     print('Completed!')
 
-    conn.commit()
-    conn.close()
-
 
 if (__name__ == '__main__'):
+    init_db()
     start_scraping()
