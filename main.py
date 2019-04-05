@@ -5,11 +5,8 @@ import sqlite3
 from config import site_lists
 
 
+
 db_name = 'answers.db'
-
-category = 'Accounting'
-category_link = 'https://interviewquestionsanswers.org/Accounting'
-
 
 url = 'https://interviewquestionsanswers.org/getPageDataV2.php'
 headers = {
@@ -25,22 +22,24 @@ headers = {
 }
 
 
-def init_db():
+def init_db(site_info):
+    table_name = site_info.get('table_name')
+
     conn = sqlite3.connect(db_name)
     c = conn.cursor()
 
-    c.execute('''CREATE TABLE if not exists account_executive
-                 (question, answer, category, category_link, sub_category, sub_category_link, multi_choice)''')
+    c.execute('''CREATE TABLE if not exists {}
+                 (question, answer, category, category_link, sub_category, sub_category_link, multi_choice)'''.format(table_name))
     
     conn.commit()
     conn.close()
 
 
-def store_to_db(question, answer, category, category_link, sub_category, sub_category_link, multi_choice):
+def store_to_db(table_name, question, answer, category, category_link, sub_category, sub_category_link, multi_choice):
     conn = sqlite3.connect(db_name)
     c = conn.cursor()
 
-    c.execute("INSERT INTO account_executive VALUES (?,?,?,?,?,?,?)", (
+    c.execute("INSERT INTO {} VALUES (?,?,?,?,?,?,?)".format(table_name), (
         question,
         answer,
         category,
@@ -54,13 +53,18 @@ def store_to_db(question, answer, category, category_link, sub_category, sub_cat
     conn.close()
 
 
-def start_scraping():
-    table_name = 'account_executive'
-    scid = 2113
+def start_scraping(site_info):
+    # NOTE: Get site info
+    table_name = site_info.get('table_name')
+    scid = site_info.get('scid')
 
-    sub_category = 'Account Executive Interview'
-    sub_category_link = 'https://interviewquestionsanswers.org/_Account-Executive'
+    category = site_info.get('category')
+    category_link = site_info.get('category_url')
 
+    sub_category = site_info.get('sub_category')
+    sub_category_link = site_info.get('sub_category_link')
+
+    # NOTE: actually start the scraping
     initial_response = requests.get(sub_category_link)
     initial_page = html.fromstring(initial_response.text)
 
@@ -74,6 +78,7 @@ def start_scraping():
         print(''.join(answer))
 
         store_to_db(
+            table_name,
             question[question.find('.')+1:],
             ''.join(answer),
             category,
@@ -114,6 +119,7 @@ def start_scraping():
                 print(''.join(answer))
 
                 store_to_db(
+                    table_name,
                     question[question.find('.')+1:],
                     ''.join(answer),
                     category,
@@ -129,5 +135,6 @@ def start_scraping():
 
 
 if (__name__ == '__main__'):
-    init_db()
-    start_scraping()
+    for site_info in site_lists:
+        init_db(site_info)
+        start_scraping(site_info)
