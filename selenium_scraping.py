@@ -57,6 +57,8 @@ def goto_end_page(site_url):
         main_content = driver.find_elements_by_xpath('//div[@class="main-content"]//div[@class="answer"]')
 
         if (saved_size == len(main_content)): break
+        
+        print('--->', len(main_content))
 
         saved_size = len(main_content)
         
@@ -110,7 +112,12 @@ if (__name__ == '__main__'):
     conn = sqlite3.connect(db_name)
     c = conn.cursor()
 
-    for (label, link) in c.execute('SELECT * from category_list'):
+    c.execute('SELECT * from category_list')
+    category_list = c.fetchall()
+
+    conn.close()
+
+    for (label, link) in category_list:
         category_info = {
             'label': label,
             'link': link,
