@@ -1,9 +1,11 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys 
 from lxml import html
+
 import sqlite3
 
 import time
+import re
 
 # NOTE: Share chrome drive across the whole code base
 chrome_options = webdriver.ChromeOptions()
@@ -83,8 +85,13 @@ def start_scraping(category_info):
         # NOTE: GO TO END OF THE PAGE
         goto_end_page(subcategory_link)
 
-        table_name = '_'.join(subcategory_label.lower().split(' '))
+        table_name = " ".join(re.findall("[a-z]+", subcategory_label.lower()))
+        table_name = '_'.join(table_name.split(' '))
+
         init_db(table_name)
+
+        print(subcategory_label, subcategory_link)
+        print('table_name--->', table_name)
 
         subcategory_page = html.fromstring(driver.page_source)
         contents = subcategory_page.xpath('//div[@class="main-content"]//div[@class="answer"]')
@@ -94,7 +101,7 @@ def start_scraping(category_info):
             answer = item.xpath('.//p[2]/text()')
 
             print('---------------------------')
-            print(''.join(answer))
+            # print(''.join(answer))
 
             store_to_db(
                 table_name,
@@ -122,6 +129,8 @@ if (__name__ == '__main__'):
             'label': label,
             'link': link,
         }
+
+        print(label, link)
 
         # category_info = {
         #     'label': 'Adobe',
