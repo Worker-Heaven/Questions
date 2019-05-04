@@ -9,11 +9,15 @@ import re
 
 import string
 
-# NOTE: Share chrome drive across the whole code base
-chrome_options = webdriver.ChromeOptions()
-chromedriver_path = "E:/Utilities/chromedriver.exe"
+from selenium.webdriver.chrome.options import Options
 
-driver = webdriver.Chrome(executable_path=chromedriver_path, chrome_options=chrome_options)
+# NOTE: Share chrome drive across the whole code base
+# chrome_options = webdriver.ChromeOptions()
+chromedriver_path = "E:/Utilities/chromedriver.exe"
+options = Options()
+options.add_argument("--headless")
+
+driver = webdriver.Chrome(executable_path=chromedriver_path, chrome_options=options)
 driver.implicitly_wait(300)
 
 base_link = 'https://www.globalguideline.com/interview_questions/'
@@ -93,7 +97,7 @@ def start_scraping(category_info):
         print(subcategory_label, subcategory_link)
         print('table_name--->', table_name)
 
-        init_db(table_name)
+        # init_db(table_name)
 
 
         # NOTE: GO TO END OF THE PAGE
@@ -114,15 +118,15 @@ def start_scraping(category_info):
             print('question', question)
             print('answer', answer)
 
-            store_to_db(
-                table_name,
-                question,
-                answer,
-                category_info.get('label'),
-                category_info.get('link'),
-                subcategory_label,
-                subcategory_link,
-            )
+            # store_to_db(
+            #     table_name,
+            #     question,
+            #     answer,
+            #     category_info.get('label'),
+            #     category_info.get('link'),
+            #     subcategory_label,
+            #     subcategory_link,
+            # )
 
 
 
